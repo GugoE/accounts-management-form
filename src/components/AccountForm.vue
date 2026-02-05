@@ -2,11 +2,18 @@
   <div class="account-form">
     <div class="account-form__header">
       <h2>Учетные записи</h2>
-      <el-button type="primary" circle @click="addAccount">+</el-button>
+      <el-button
+          type="primary"
+          circle
+          @click="addAccount"
+      >+</el-button>
     </div>
 
     <div class="account-form__hint">
-      <el-tooltip effect="dark" content="Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;" placement="top">
+      <el-tooltip
+          effect="dark"
+          content="Для указания нескольких меток для одной пары логин/пароль используйте разделитель ;"
+          placement="top">
         <el-icon><QuestionFilled /></el-icon>
       </el-tooltip>
     </div>

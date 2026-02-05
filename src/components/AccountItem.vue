@@ -3,17 +3,26 @@
     <el-form :model="form">
       <div class="account-item__grid">
         <el-form-item label="Метки">
-          <el-input
-              v-model="labelsString"
+          <el-select
+              v-model="labelsForSelect"
+              multiple
+              collapse-tags
+              filterable
+              allow-create
               placeholder="tag1; tag2; tag3"
-              maxlength="50"
-              show-word-limit
-              @blur="save"
-          />
+              @change="onLabelsChange"
+          >
+            <el-option
+                v-for="label in labelsForSelect"
+                :key="label"
+                :label="label"
+                :value="label"
+            />
+          </el-select>
         </el-form-item>
 
         <el-form-item label="Тип">
-          <el-select v-model="form.type">
+          <el-select v-model="form.type" @change="save('type')">
             <el-option label="LDAP" :value="AccountType.LDAP" />
             <el-option label="Локальная" :value="AccountType.LOCAL" />
           </el-select>
@@ -52,11 +61,10 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import type { Account } from '@/types/account'
-import { AccountType } from '@/types/account'
+import type { Account, LabelItem } from '@/types/account'
+import { AccountType, FieldTypes } from '@/types/account'
 import { useAccountsStore } from '@/stores/accounts'
 import { validateAccount } from '@/utils/validateAccount'
-import { FieldTypes } from '@/types/account'
 
 const props = defineProps<{ account: Account }>()
 const store = useAccountsStore()
@@ -65,14 +73,11 @@ watch(() => props.account, val => (form.value = { ...val }))
 
 const errors = ref({ login: false, password: false })
 
-const labelsString = computed({
-  get: () => form.value.labels.map(l => l.text).join('; '),
-  set: (value: string) =>
-      (form.value.labels = value
-          .split(';')
-          .map(v => v.trim())
-          .filter(Boolean)
-          .map(text => ({ text })))
+const labelsForSelect = computed<LabelItem[]>({
+  get: () => form.value.labels.map(l => l.text),
+  set: (val: string[]) => {
+    form.value.labels = val.map(text => ({ text }))
+  }
 })
 
 function save(field?: FieldTypes) {
@@ -91,6 +96,11 @@ watch(() => form.value.type, type => {
 
 function remove() {
   store.remove(form.value.id)
+}
+
+function onLabelsChange(val: LabelItem[]) {
+  labelsForSelect.value = val
+  save('labels')
 }
 </script>
 
