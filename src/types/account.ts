@@ -26,5 +26,7 @@ export interface Account {
 /** Типы полей аккаунта для валидации или работы с формой */
 export enum FieldTypes {
   LOGIN = 'login',
-  PASSWORD = 'password'
+  PASSWORD = 'password',
+  LABELS = 'labels',
+  TYPE = 'type',
 }

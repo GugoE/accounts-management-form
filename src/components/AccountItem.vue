@@ -6,23 +6,19 @@
           <el-select
               v-model="labelsForSelect"
               multiple
-              collapse-tags
               filterable
               allow-create
+              empty-text=""
+              :reserve-keyword="false"
               placeholder="tag1; tag2; tag3"
-              @change="onLabelsChange"
+              @change="save(FieldTypes.LABELS)"
           >
-            <el-option
-                v-for="label in labelsForSelect"
-                :key="label"
-                :label="label"
-                :value="label"
-            />
+            <template #empty />
           </el-select>
         </el-form-item>
 
         <el-form-item label="Тип">
-          <el-select v-model="form.type" @change="save('type')">
+          <el-select v-model="form.type" @change="save(FieldTypes.TYPE)">
             <el-option label="LDAP" :value="AccountType.LDAP" />
             <el-option label="Локальная" :value="AccountType.LOCAL" />
           </el-select>
@@ -33,7 +29,7 @@
               v-model="form.login"
               maxlength="100"
               show-word-limit
-              @blur="save('login')"
+              @blur="save(FieldTypes.LOGIN)"
           />
         </el-form-item>
 
@@ -47,7 +43,7 @@
               type="password"
               maxlength="100"
               show-word-limit
-              @blur="save('password')"
+              @blur="save(FieldTypes.PASSWORD)"
           />
         </el-form-item>
       </div>
@@ -61,27 +57,32 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import type { Account, LabelItem } from '@/types/account'
+import type { Account } from '@/types/account'
 import { AccountType, FieldTypes } from '@/types/account'
 import { useAccountsStore } from '@/stores/accounts'
 import { validateAccount } from '@/utils/validateAccount'
 
 const props = defineProps<{ account: Account }>()
 const store = useAccountsStore()
+
 const form = ref<Account>({ ...props.account })
 watch(() => props.account, val => (form.value = { ...val }))
 
 const errors = ref({ login: false, password: false })
 
-const labelsForSelect = computed<LabelItem[]>({
+const labelsForSelect = computed<string[]>({
   get: () => form.value.labels.map(l => l.text),
-  set: (val: string[]) => {
+  set: val => {
     form.value.labels = val.map(text => ({ text }))
   }
 })
 
 function save(field?: FieldTypes) {
-  const { isValid, errors: validationErrors } = validateAccount(form.value, field, errors.value)
+  const { isValid, errors: validationErrors } = validateAccount(
+      form.value,
+      field,
+      errors.value
+  )
   errors.value = validationErrors
   if (!isValid) return
   store.update({ ...form.value })
@@ -97,14 +98,9 @@ watch(() => form.value.type, type => {
 function remove() {
   store.remove(form.value.id)
 }
-
-function onLabelsChange(val: LabelItem[]) {
-  labelsForSelect.value = val
-  save('labels')
-}
 </script>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 .account-item {
   padding: 16px;
 
