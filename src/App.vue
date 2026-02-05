@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import AccountsView from '@/views/AccountsView.vue'
 
 </script>
 
 <template>
-  <div>accounts management form</div>
+  <AccountsView />
 </template>
 
 <style scoped></style>
